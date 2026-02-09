@@ -23,7 +23,7 @@ const Header = () => {
   return (
     <header className={cn('flex items-center justify-between  px-2.5 md:px-5 ')}>
       <div className={cn('relative -left-4 min-w-55 max-w-72')}>
-        <NavLink to={{ pathname: '/', search: '?page=0' }}>
+        <NavLink to={{ pathname: '/' }}>
           <img src={logo} alt='logo' />
         </NavLink>
       </div>

@@ -15,6 +15,7 @@ import {
   PaginationPrevious,
 } from './ui/pagination'
 import useResponsive from './hooks/useResponsive'
+import Loading from './Loading'
 
 const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
   const [searchParams] = useSearchParams()
@@ -23,8 +24,8 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
 
   const { isMobile } = useResponsive({ query: '(min-width: 768px)' })
 
-  const { data } = useQuery({
-    queryKey: ['list-store', listCategory['dang-phat-hanh']],
+  const { data, isLoading } = useQuery({
+    queryKey: ['list-store', listCategory['dang-phat-hanh'], page],
     queryFn: () =>
       getListStore({ type: listCategory['dang-phat-hanh'], page: Number(page) }),
     refetchInterval: 60000,
@@ -36,7 +37,9 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
   }
 
   const totalPage = Math.ceil(Number(data?.params.pagination.totalItems) / 24) ?? 0
-  if (isLoadingStore) return <></>
+
+  if (isLoadingStore || isLoading) return <Loading />
+
   return (
     <section className={cn('mt-5')}>
       <h3 className={cn('text-xl font-normal')}>MeTruyen - Truyện gì cũng có!</h3>
@@ -57,6 +60,9 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
+                  onClick={(e) => {
+                    e.preventDefault()
+                  }}
                   href={Number(page) > 1 ? `?page=${Number(page) - 1}` : undefined}
                 />
               </PaginationItem>
@@ -67,7 +73,10 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
                   <PaginationLink
                     href={`?page=${p}`}
                     isActive={p === Number(page)}
-                    onClick={() => handleChangePage(p)}>
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleChangePage(p)
+                    }}>
                     {p}
                   </PaginationLink>
                 </PaginationItem>
@@ -85,7 +94,10 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
                       <PaginationLink
                         href={`?page=${p}`}
                         isActive={p === Number(page)}
-                        onClick={() => handleChangePage(p)}>
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleChangePage(p)
+                        }}>
                         {p}
                       </PaginationLink>
                     </PaginationItem>
@@ -103,7 +115,10 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
                   <PaginationLink
                     href={`?page=${p}`}
                     isActive={p === Number(page)}
-                    onClick={() => handleChangePage(p)}>
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleChangePage(p)
+                    }}>
                     {p}
                   </PaginationLink>
                 </PaginationItem>
@@ -111,6 +126,9 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
 
               <PaginationItem>
                 <PaginationNext
+                  onClick={(e) => {
+                    e.preventDefault()
+                  }}
                   href={
                     Number(page) < totalPage ? `?page=${Number(page) + 1}` : undefined
                   }
