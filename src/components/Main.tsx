@@ -23,7 +23,7 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
 
   const { isMobile } = useResponsive({ query: '(min-width: 768px)' })
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ['list-store', listCategory['dang-phat-hanh']],
     queryFn: () =>
       getListStore({ type: listCategory['dang-phat-hanh'], page: Number(page) }),
@@ -36,7 +36,7 @@ const Main = ({ isLoadingStore }: { isLoadingStore: boolean }) => {
   }
 
   const totalPage = Math.ceil(Number(data?.params.pagination.totalItems) / 24) ?? 0
-  if (isLoadingStore || isLoading) return <></>
+  if (isLoadingStore) return <></>
   return (
     <section className={cn('mt-5')}>
       <h3 className={cn('text-xl font-normal')}>MeTruyen - Truyện gì cũng có!</h3>
