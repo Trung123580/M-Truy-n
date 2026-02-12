@@ -12,6 +12,7 @@ import ErrorPage from '@/components/ErrorPage.tsx'
 import { AuthProvider } from './context/AuthProvider.tsx'
 import Details from './page/Details.tsx'
 import ReadStories from './page/ReadStories.tsx'
+import { Toaster } from '@/components/ui/sonner'
 
 const queryClient = new QueryClient()
 
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')!).render(
         <div className={'container mx-auto'}>
           <BrowserRouter>
             <Header />
+            <Toaster position='top-right' className='toaster groupx' duration={300000} />
             <Routes>
               <Route index element={<App />} />
               <Route path={pathRoute.category} element={<Category />} />

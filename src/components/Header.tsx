@@ -14,12 +14,15 @@ import { getCategoryStore } from '@/services'
 import { NavLink } from 'react-router'
 import { Input } from '@/components/ui/input.tsx'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/context/AuthProvider'
 
 const Header = () => {
   const { data } = useQuery({
     queryKey: ['category'],
     queryFn: getCategoryStore,
   })
+  const { signIn, signOut, isLogin, user } = useAuth()
+
   return (
     <header className={cn('flex items-center justify-between  px-2.5 md:px-5 ')}>
       <div className={cn('relative -left-4 min-w-55 max-w-72')}>
@@ -64,16 +67,34 @@ const Header = () => {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Avatar>
-              <AvatarImage src='https://github.com/shadcn.png' alt='@shadcn' />
-              <AvatarFallback delayMs={12000}>TT</AvatarFallback>
+              <AvatarImage
+                src={user?.avatar ?? 'https://github.com/shadcn.png'}
+                alt={user?.userName ?? ''}
+              />
+              <AvatarFallback delayMs={12000}>
+                {user?.userName?.charAt(0) ?? 'MT'}
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
-          </DropdownMenuContent>
+          {isLogin ? (
+            <DropdownMenuContent className='bg-dark'>
+              <DropdownMenuLabel className='text-center text-primary'>
+                Mê Truyện
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Truyện theo dõi</DropdownMenuItem>
+              <DropdownMenuItem>Truyện đã đọc</DropdownMenuItem>
+              <DropdownMenuItem onClick={signOut}>Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+          ) : (
+            <DropdownMenuContent className='bg-dark'>
+              <DropdownMenuLabel className='text-center text-primary'>
+                Mê Truyện
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signIn}>Login</DropdownMenuItem>
+            </DropdownMenuContent>
+          )}
         </DropdownMenu>
       </div>
     </header>

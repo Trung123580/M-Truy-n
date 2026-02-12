@@ -8,12 +8,15 @@ import Loading from '@/components/Loading'
 import { Button } from '@/components/ui/button'
 import { Database, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/context/AuthProvider'
 const variants = ['default', 'ghost', 'link', 'outline', 'secondary', 'destructive']
 
 const Details = () => {
   const [searchParams] = useSearchParams()
   const [isShowAll, setIsShowAll] = useState(false)
   const slug = searchParams.get('slug') ?? ''
+
+  const { onPushData, user } = useAuth()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['detail', slug],
@@ -26,6 +29,9 @@ const Details = () => {
   }, [slug, data])
 
   console.log({ data })
+
+  const isFollow = user?.follow?.find((item: any) => item._id === data?.item._id)
+
   if (isLoading) return <Loading />
   if (isError) return <ErrorPage />
   return (
@@ -60,7 +66,6 @@ const Details = () => {
               <div className='flex flex-wrap gap-1.5'>
                 {data?.item.category.map((item, index) => {
                   const variant = variants[index]
-                  console.log({ variant })
                   return <Button variant={variant as any}>{item.name}</Button>
                 })}
               </div>
@@ -75,16 +80,19 @@ const Details = () => {
                 dangerouslySetInnerHTML={{ __html: data?.item.content ?? '' }}></span>
             </li>
           </ul>
-          <div className='flex gap-2.5 *:text-lg mt-5 *:flex-1 w-full md:flex-row flex-col md:w-[70%]'>
-            <Button className='cursor-pointer'>
+          <div className='flex gap-2.5 *:text-lg mt-5 *:flex-1 w-full md:flex-row flex-col md:w-[70%] *:cursor-pointer'>
+            <Button>
               <NavLink
                 to={`/read-stories?slug=${slug}&chapter=${data?.item.chapters?.[0]?.server_data?.[0]?.chapter_name}`}>
                 Đọc Truyện
               </NavLink>
             </Button>
             <Button variant={'outline'}>Tiếp Tục Đọc</Button>
-            <Button variant={'link'}>
-              <Heart /> Theo Dõi
+            <Button
+              variant={'link'}
+              onClick={() => onPushData({ data: data?.item, type: 'follow' })}>
+              <Heart />
+              {isFollow ? 'Bỏ Theo Dõi' : 'Theo Dõi'}
             </Button>
           </div>
         </div>
@@ -102,15 +110,15 @@ const Details = () => {
                   <ul
                     className={cn(
                       'border  border-primary mt-5 rounded-xl p-2.5 overflow-auto transition-all duration-300',
-                      isShowAll ? 'max-h-max' : 'max-h-80',
+                      isShowAll || item.server_data.length < 6 ? 'max-h-max' : 'max-h-80',
                     )}>
                     {item.server_data.map((chapter) => {
                       return (
                         <li
                           key={chapter.filename}
-                          className='text-xl last:border-b-0 border-b border-primary hover:bg-primary/30'>
+                          className='text-xl last:border-b-0 duration-300 border-b border-primary hover:bg-primary/30'>
                           <NavLink
-                            className='inline-block w-full text-lg'
+                            className='inline-block w-full text-lg py-1'
                             to={`/read-stories?slug=${slug}&chapter=${chapter.chapter_name}`}>
                             Chương {chapter.chapter_name}
                           </NavLink>
@@ -121,7 +129,7 @@ const Details = () => {
                   <div
                     className={cn(
                       'absolute bottom-0 flex items-center justify-center left-0 h-10 bg-primary/30 w-full rounded-b-xl',
-                      isShowAll ? 'hidden' : '',
+                      isShowAll || item.server_data.length < 6 ? 'hidden' : '',
                     )}>
                     <Button
                       className='cursor-pointer'

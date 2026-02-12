@@ -5,7 +5,6 @@ import { getListStore } from './services'
 import { useQuery } from '@tanstack/react-query'
 import ErrorPage from './components/ErrorPage'
 import Loading from './components/Loading'
-
 function App() {
   const {
     data: newStoreData,

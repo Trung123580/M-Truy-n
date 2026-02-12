@@ -12,3 +12,8 @@ export const pathRoute = {
   detail: 'detail',
   'read-stories': 'read-stories',
 }
+
+export const typePush = {
+  history: 'history',
+  follow: 'follow',
+}
