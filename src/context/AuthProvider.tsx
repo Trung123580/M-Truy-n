@@ -53,6 +53,8 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState(cookies.get('user-id') ?? '')
   const [user, setUser] = useState<User | null>(null)
   const userCollection = collection(db, 'users')
+  console.log({ userId })
+
   useEffect(() => {
     const getUser = async () => {
       try {
@@ -94,7 +96,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error(error)
     }
   }
-  const userDoc = doc(db, 'users', userId)
 
   const handleSignOutApp = async () => {
     setUserId('')
@@ -112,6 +113,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     chapter_name?: string
   }) => {
     if (!user) return
+    const userDoc = doc(db, 'users', userId)
     const findItem = user?.[type]?.find((item: any) => item._id === data._id)
     if (!findItem) {
       setUser((prev: any) => {
@@ -148,6 +150,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     type: keyof typeof typePush
   }) => {
     if (!user) return
+    const userDoc = doc(db, 'users', userId)
     const findItem = user?.[type]?.find((item: any) => item._id === data._id)
     if (findItem) {
       setUser((prev: any) => {
@@ -173,6 +176,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     chapter_name: string
     slug: string
   }) => {
+    const userDoc = doc(db, 'users', userId)
     const updateChapter = user?.history.map((item: any) => {
       return {
         ...item,

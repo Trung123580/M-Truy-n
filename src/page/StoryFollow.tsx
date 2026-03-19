@@ -43,7 +43,7 @@ const StoryFollow = () => {
 
   return (
     <section className={cn('mt-5  px-2.5 md:px-5 ')}>
-      <h3 className={cn('text-2xl font-normal capitalize')}>Truyện Đã Đọc</h3>
+      <h3 className={cn('text-2xl font-normal capitalize')}>Truyện Theo Dõi</h3>
       <div className={cn('mt-3')}>
         <div
           className={cn(

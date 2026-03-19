@@ -3,13 +3,13 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 const firebaseConfig = {
-  apiKey: 'AIzaSyBj5cYWG4FkrZYepSV4ZC5ALijsr36nhaE',
-  authDomain: 'test-mobi-marathon.firebaseapp.com',
-  projectId: 'test-mobi-marathon',
-  storageBucket: 'test-mobi-marathon.firebasestorage.app',
-  messagingSenderId: '768971903837',
-  appId: '1:768971903837:web:0b279196fc57966fb70eb4',
-  measurementId: 'G-V7SYDVY74B',
+  apiKey: 'AIzaSyCjhFOgnZz6JipRf6zHIOqPiZ9AtthfYhA',
+  authDomain: 'me-truyen-874da.firebaseapp.com',
+  projectId: 'me-truyen-874da',
+  storageBucket: 'me-truyen-874da.firebasestorage.app',
+  messagingSenderId: '509648683133',
+  appId: '1:509648683133:web:9db6a13d15a3e3eeb43114',
+  measurementId: 'G-CHSFM75EDF',
 }
 
 const app = initializeApp(firebaseConfig)
