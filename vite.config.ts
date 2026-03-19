@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 3000,
+    allowedHosts: ['me-truyen.vercel.app'],
   },
   resolve: {
     alias: {
