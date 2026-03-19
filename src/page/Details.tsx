@@ -16,7 +16,7 @@ const Details = () => {
   const [isShowAll, setIsShowAll] = useState(false)
   const slug = searchParams.get('slug') ?? ''
 
-  const { onPushData, user } = useAuth()
+  const { onPushData, user, isLogin, onDeleteData } = useAuth()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['detail', slug],
@@ -28,12 +28,15 @@ const Details = () => {
     if (data?.item) document.title = data?.item.name
   }, [slug, data])
 
-  console.log({ data })
-
   const isFollow = user?.follow?.find((item: any) => item._id === data?.item._id)
+
+  const userContinueChapter = user?.history?.find(
+    (item: any) => item.slug.trim().toLowerCase() === slug.trim().toLowerCase(),
+  )
 
   if (isLoading) return <Loading />
   if (isError) return <ErrorPage />
+
   return (
     <section className='pb-10 px-2.5 md:px-5'>
       <div className='flex gap-5 mt-5 md:flex-row flex-col items-start'>
@@ -66,7 +69,11 @@ const Details = () => {
               <div className='flex flex-wrap gap-1.5'>
                 {data?.item.category.map((item, index) => {
                   const variant = variants[index]
-                  return <Button variant={variant as any}>{item.name}</Button>
+                  return (
+                    <Button key={item.id} variant={variant as any}>
+                      {item.name}
+                    </Button>
+                  )
                 })}
               </div>
             </li>
@@ -83,15 +90,28 @@ const Details = () => {
           <div className='flex gap-2.5 *:text-lg mt-5 *:flex-1 w-full md:flex-row flex-col md:w-[70%] *:cursor-pointer'>
             <Button>
               <NavLink
+                onClick={() => onPushData({ data: data?.item, type: 'history' })}
                 to={`/read-stories?slug=${slug}&chapter=${data?.item.chapters?.[0]?.server_data?.[0]?.chapter_name}`}>
                 Đọc Truyện
               </NavLink>
             </Button>
-            <Button variant={'outline'}>Tiếp Tục Đọc</Button>
+            {isLogin && (
+              <Button variant={'outline'}>
+                <NavLink
+                  onClick={() => onPushData({ data: data?.item, type: 'history' })}
+                  to={`/read-stories?slug=${slug}&chapter=${(userContinueChapter as any)?.continueChapter ?? data?.item.chapters?.[0]?.server_data?.[0]?.chapter_name}`}>
+                  Tiếp Tục Đọc
+                </NavLink>
+              </Button>
+            )}
             <Button
               variant={'link'}
-              onClick={() => onPushData({ data: data?.item, type: 'follow' })}>
-              <Heart />
+              onClick={() =>
+                isFollow
+                  ? onDeleteData({ data: data?.item, type: 'follow' })
+                  : onPushData({ data: data?.item, type: 'follow' })
+              }>
+              <Heart className={cn('text-primary', isFollow ? 'fill-primary' : '')} />
               {isFollow ? 'Bỏ Theo Dõi' : 'Theo Dõi'}
             </Button>
           </div>
@@ -112,13 +132,20 @@ const Details = () => {
                       'border  border-primary mt-5 rounded-xl p-2.5 overflow-auto transition-all duration-300',
                       isShowAll || item.server_data.length < 6 ? 'max-h-max' : 'max-h-80',
                     )}>
-                    {item.server_data.map((chapter) => {
+                    {item.server_data.map((chapter, index) => {
                       return (
                         <li
-                          key={chapter.filename}
+                          key={chapter.filename + index}
                           className='text-xl last:border-b-0 duration-300 border-b border-primary hover:bg-primary/30'>
                           <NavLink
                             className='inline-block w-full text-lg py-1'
+                            onClick={() =>
+                              onPushData({
+                                data: data?.item,
+                                type: 'history',
+                                chapter_name: chapter.chapter_name,
+                              })
+                            }
                             to={`/read-stories?slug=${slug}&chapter=${chapter.chapter_name}`}>
                             Chương {chapter.chapter_name}
                           </NavLink>

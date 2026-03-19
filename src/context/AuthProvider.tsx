@@ -22,11 +22,27 @@ type TypeAuthContext = {
   onPushData: ({
     data,
     type,
-    unType,
+    chapter_name,
   }: {
     data: any
     type: keyof typeof typePush
-    unType?: boolean
+    chapter_name?: string
+  }) => Promise<void>
+  onDeleteData: ({
+    data,
+    type,
+  }: {
+    data: any
+    type: keyof typeof typePush
+  }) => Promise<void>
+  onPushcontinueChapter: ({
+    slug,
+    chapter_name,
+    data,
+  }: {
+    slug: string
+    chapter_name: string
+    data: any
   }) => Promise<void>
 }
 
@@ -37,7 +53,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState(cookies.get('user-id') ?? '')
   const [user, setUser] = useState<User | null>(null)
   const userCollection = collection(db, 'users')
-  // console.log({ isAuth })
   useEffect(() => {
     const getUser = async () => {
       try {
@@ -45,13 +60,10 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
           const docRef = doc(db, 'users', userId)
           const docSnap = await getDoc(docRef)
           const data = docSnap.data() as User
-          console.log({ data })
           setUser(data)
-          // dispatch(dataUser(data)) // user
         }
       } catch (error) {
         console.error(error)
-        console.log('loi')
       }
     }
     getUser()
@@ -82,6 +94,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error(error)
     }
   }
+  const userDoc = doc(db, 'users', userId)
 
   const handleSignOutApp = async () => {
     setUserId('')
@@ -92,27 +105,14 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handlePushData = async ({
     data,
     type,
+    chapter_name,
   }: {
     data: any
     type: keyof typeof typePush
+    chapter_name?: string
   }) => {
-    const userDoc = doc(db, 'users', userId)
+    if (!user) return
     const findItem = user?.[type]?.find((item: any) => item._id === data._id)
-    if (findItem) {
-      setUser((prev: any) => {
-        return {
-          ...prev,
-          [type]: prev?.[type]?.filter((item: any) => item._id !== data._id),
-        }
-      })
-      await updateDoc(userDoc, {
-        [type]: user?.[type]?.filter((item: any) => item._id !== data._id),
-      }).then(() => {
-        const textMessage = type === 'follow' ? 'Đã xóa khỏi danh sách theo dõi' : ''
-        toast.success(textMessage)
-      })
-      return
-    }
     if (!findItem) {
       setUser((prev: any) => {
         return {
@@ -130,6 +130,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             name: data.name,
             updatedAt: data.updatedAt,
             category: data.category,
+            continueChapter: Number(chapter_name ?? 0),
           },
         ],
       }).then(() => {
@@ -137,6 +138,62 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (textMessage) toast.success(textMessage, {})
       })
     }
+  }
+
+  const handleDeletaData = async ({
+    data,
+    type,
+  }: {
+    data: any
+    type: keyof typeof typePush
+  }) => {
+    if (!user) return
+    const findItem = user?.[type]?.find((item: any) => item._id === data._id)
+    if (findItem) {
+      setUser((prev: any) => {
+        return {
+          ...prev,
+          [type]: prev?.[type]?.filter((item: any) => item._id !== data._id),
+        }
+      })
+      await updateDoc(userDoc, {
+        [type]: user?.[type]?.filter((item: any) => item._id !== data._id),
+      }).then(() => {
+        const textMessage = type === 'follow' ? 'Đã xóa khỏi danh sách theo dõi' : ''
+        toast.error(textMessage)
+      })
+      return
+    }
+  }
+
+  const handlePushcontinueChapter = async ({
+    chapter_name,
+    slug,
+  }: {
+    chapter_name: string
+    slug: string
+  }) => {
+    const updateChapter = user?.history.map((item: any) => {
+      return {
+        ...item,
+        continueChapter: Number(item.slug === slug ? chapter_name : 0),
+      }
+    })
+    setUser((prev: any) => {
+      return {
+        ...prev,
+        history: prev.history.map((item: any) => {
+          return {
+            ...item,
+            continueChapter: Number(item.slug === slug ? chapter_name : 0),
+          }
+        }),
+      }
+    })
+
+    await updateDoc(userDoc, {
+      history: updateChapter,
+    })
   }
 
   return (
@@ -147,6 +204,8 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         signIn: handleLoginApp,
         signOut: handleSignOutApp,
         onPushData: handlePushData,
+        onPushcontinueChapter: handlePushcontinueChapter,
+        onDeleteData: handleDeletaData,
       }}>
       {children}
     </AuthContext.Provider>

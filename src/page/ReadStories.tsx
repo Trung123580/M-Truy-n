@@ -1,5 +1,5 @@
 import { NavLink, useNavigate, useSearchParams } from 'react-router'
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, CircleArrowUp, Heart, House } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import ErrorPage from '@/components/ErrorPage'
@@ -10,19 +10,22 @@ import { callApiReadStories, getDetails } from '@/services'
 import type { ReadChapter } from '@/types'
 import MenuChapters from '@/components/MenuChapters'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/context/AuthProvider'
+// import { useAuth } from '@/context/AuthProvider'
 
 const ReadStories = () => {
   const [currentChapterData, setCurrentChapterData] = useState<ReadChapter | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+
+  const { onPushcontinueChapter, user, onPushData, onDeleteData } = useAuth()
   const slug = searchParams.get('slug') ?? ''
   const chapter = searchParams.get('chapter') ?? '1'
-  const [isLoading, setIsLoading] = useState(false)
   const { data, isError } = useQuery({
     queryKey: ['detail', slug],
     queryFn: () => getDetails({ slug }),
   })
-  console.log({ isLoading })
   useLayoutEffect(() => {
     if (!slug) window.history.back()
   }, [slug])
@@ -43,12 +46,29 @@ const ReadStories = () => {
     }
   }, [data, chapter])
 
+  const handlePushChapter = useCallback(
+    ({ chapter }: { chapter: string }) => {
+      if (!!currentChapterData && !!user) {
+        onPushcontinueChapter({
+          data: data,
+          chapter_name: chapter,
+          slug: slug,
+        })
+      }
+    },
+    [currentChapterData, data, slug, user, onPushcontinueChapter],
+  )
+  useEffect(() => {
+    handlePushChapter({ chapter: chapter })
+  }, [chapter])
+
   const handlePrevChapter = () => {
     const currentIndex = chapters.findIndex((item) => item.chapter_name === chapter)
     if (currentIndex > 0) {
       const prevChapter = chapters[currentIndex - 1].chapter_name
       searchParams.set('chapter', prevChapter)
       navigate(`?${searchParams.toString()}`)
+      handlePushChapter({ chapter: prevChapter })
     }
   }
 
@@ -58,6 +78,7 @@ const ReadStories = () => {
       const nextChapter = chapters[currentIndex + 1].chapter_name
       searchParams.set('chapter', nextChapter)
       navigate(`?${searchParams.toString()}`)
+      handlePushChapter({ chapter: nextChapter })
     }
   }
 
@@ -65,6 +86,7 @@ const ReadStories = () => {
   const domain_cdn = currentChapterData?.domain_cdn ?? ''
   const chapter_path = currentChapterData?.item.chapter_path ?? ''
   const chapters = data?.item.chapters?.[0]?.server_data ?? []
+  const isFollow = user?.follow?.some((item: any) => item._id === data?.item._id)
 
   if (isLoading) return <Loading />
   if (isError) return <ErrorPage />
@@ -113,8 +135,18 @@ const ReadStories = () => {
                 <ChevronRight />
               </Button>
             </div>
-            <Button size={'sm'}>
-              <Heart /> <span className={cn('md:block hidden')}>theo dõi</span>
+            <Button
+              variant={'link'}
+              size={'sm'}
+              onClick={() =>
+                isFollow
+                  ? onDeleteData({ data: data?.item, type: 'follow' })
+                  : onPushData({ data: data?.item, type: 'follow' })
+              }>
+              <Heart className={cn('text-primary', isFollow ? 'fill-primary' : '')} />{' '}
+              <span className={cn('md:block hidden')}>
+                {isFollow ? 'Bỏ Theo Dõi' : 'Theo Dõi'}
+              </span>
             </Button>
           </div>
         </div>

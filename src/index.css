@@ -212,7 +212,7 @@
   }
 
   a {
-    @apply w-full;
+    /* @apply w-full; */
   }
 
   img {

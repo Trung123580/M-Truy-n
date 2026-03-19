@@ -15,38 +15,39 @@ import { cn } from '@/lib/utils'
 import { getCategory } from '@/services'
 import { listCategory } from '@/utils/constant'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 
 const Category = () => {
   const [searchParams] = useSearchParams()
   const slug = searchParams.get('slug') as keyof typeof listCategory
-  console.log({ slug })
 
   const page = searchParams.get('page') || 1
   const naviagte = useNavigate()
 
   const { isMobile } = useResponsive({ query: '(min-width: 768px)' })
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['category', slug],
     queryFn: () => getCategory({ type: slug, page: Number(page) }),
     refetchInterval: 60000,
   })
+  useEffect(() => {
+    if (!slug || data?.items.length === 0) window.history.back()
+  }, [slug, data])
 
   const handleChangePage = (page: number) => {
     if (page === 0) return
     naviagte(`?slug=${slug}&page=${page}`)
   }
 
-  console.log({ data, isLoading, isError })
-
-  const totalPage = Math.ceil(Number(data?.params.pagination.totalItems) / 24) ?? 0
+  const totalPage = Math.ceil(Number(data?.params?.pagination?.totalItems ?? 0) / 24) ?? 0
 
   if (isLoading) return <Loading />
 
   return (
     <section className={cn('mt-5  px-2.5 md:px-5 ')}>
-      <h3 className={cn('text-xl font-normal capitalize')}>{data?.titlePage ?? ''}</h3>
+      <h3 className={cn('text-2xl font-normal capitalize')}>{data?.titlePage ?? ''}</h3>
       <div className={cn('mt-3')}>
         <div
           className={cn(
@@ -54,7 +55,9 @@ const Category = () => {
           )}>
           {data?.items.map((item) => {
             return (
-              <Card className={cn('p-0 h-64 md:h-72 lg:h-83 overflow-hidden')}>
+              <Card
+                key={item._id}
+                className={cn('p-0 h-64 md:h-72 lg:h-83 overflow-hidden')}>
                 <CardContent
                   className={cn(
                     'h-full flex aspect-square items-center justify-center p-0',

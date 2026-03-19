@@ -102,3 +102,24 @@ export const callApiReadStories = async ({
     throw error
   }
 }
+
+export const getSearchStore = async ({
+  query,
+  page = 1,
+}: {
+  query: string
+  page?: number
+}): Promise<ResponseStore> => {
+  try {
+    const response = await instance.get(`/tim-kiem?keyword=${query}`, {
+      validateStatus: (status) => status === 200,
+      params: {
+        page,
+      },
+    })
+    return response.data.data
+  } catch (error) {
+    console.error('Error fetching home store data:', error)
+    throw error
+  }
+}

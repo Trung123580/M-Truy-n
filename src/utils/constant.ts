@@ -11,6 +11,9 @@ export const pathRoute = {
   'story-list': 'story-list',
   detail: 'detail',
   'read-stories': 'read-stories',
+  'story-read': 'story-read',
+  'story-follow': 'story-follow',
+  search: 'search',
 }
 
 export const typePush = {
