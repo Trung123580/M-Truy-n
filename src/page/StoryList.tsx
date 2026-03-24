@@ -37,7 +37,7 @@ const StoryList = () => {
     naviagte(`?slug=${listCategory[slug]}&page=${page}`)
   }
 
-  const totalPage = Math.ceil(Number(data?.params.pagination.totalItems) / 24) ?? 0
+  const totalPage = Math.ceil(Number(data?.params.pagination.totalItems) / 24) || 0
 
   if (isLoading) return <Loading />
 
